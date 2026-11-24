@@ -31,8 +31,7 @@ This repository was updated by remote file commits, but the project has not yet 
 - Seed-by-seed movement animation and sound.
 - Better board sizing for narrow/landscape screens.
 - Tutorial and rule variants.
-- Yoruba and English localization.
-- Online lobby/relay, reconnect and server-side validation.
+- Online lobby/relay, NAT traversal, reconnect and stronger network security (direct connect remains fragile).
 - Android export presets and release testing.
 
 ## Cultural note

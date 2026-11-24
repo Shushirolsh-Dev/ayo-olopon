@@ -21,6 +21,7 @@ var ai_busy := false
 var network_peer: ENetMultiplayerPeer
 var network_connected := false
 var online_host := false
+var online_client_peer_id := 0
 var host_address := "127.0.0.1"
 var address_input: LineEdit
 var mode_panel: VBoxContainer
@@ -101,7 +102,14 @@ func show_menu() -> void:
 	_add_menu_button("Two Players · Same Device", start_local)
 	_add_menu_button("Online · Host Game", host_game)
 	_add_menu_button("Online · Join Game", join_game)
+	_add_menu_button("How to play", show_rules)
 	_add_menu_label("Offline modes work without internet.", 14)
+
+func show_rules() -> void:
+	_clear_menu()
+	_add_menu_label("How to play Àyò Ọ̀pọ̀", 26)
+	_add_menu_label("1. Choose a pit on your side with seeds.\n2. Seeds are sown forward, one per pit.\n3. Your starting pit is skipped when sowing laps.\n4. Capture opponent pits ending with 2 or 3 seeds.\n5. Captures chain backward through qualifying pits.\n6. If the opponent has no seeds, feed them if possible.\n7. If no legal move/feed remains, the game ends and\n   remaining seeds are swept to their owners.", 16)
+	_add_menu_button("Back", show_menu)
 
 func _setup_board(new_mode: Mode) -> void:
 	mode = new_mode
@@ -148,6 +156,7 @@ func _start_host() -> void:
 	online_host = true
 	network_connected = true
 	multiplayer.peer_connected.connect(_on_peer_connected)
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	_setup_board(Mode.ONLINE)
 	message = "Hosting on UDP %d. Waiting for opponent..." % PORT
 	refresh_board()
@@ -180,9 +189,16 @@ func _start_join() -> void:
 	refresh_board()
 
 func _on_peer_connected(id: int) -> void:
+	online_client_peer_id = id
 	message = "Opponent connected! Your move."
 	refresh_board()
 	_broadcast_state.rpc(pits, scores, turn, ended, message)
+
+func _on_peer_disconnected(id: int) -> void:
+	if online_host and id == online_client_peer_id:
+		network_connected = false
+		message = "Opponent disconnected."
+		refresh_board()
 
 func _on_connected() -> void:
 	network_connected = true
@@ -437,7 +453,11 @@ func _board_eval(board: Array) -> float:
 func _request_move(move: int) -> void:
 	if not online_host or mode != Mode.ONLINE:
 		return
-	if turn != 1 or move < 6 or move > 11 or pits[move] <= 0:
+	if multiplayer.get_remote_sender_id() != online_client_peer_id or online_client_peer_id <= 0:
+		return
+	if ended or turn != 1 or move < 6 or move > 11 or pits[move] <= 0:
+		return
+	if move not in _legal_moves(pits, 1):
 		return
 	_apply_turn(move)
 

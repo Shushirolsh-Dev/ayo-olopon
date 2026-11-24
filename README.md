@@ -1,16 +1,30 @@
-# Àyò Ọ̀pọ̀ (Ayo Olopon)
+# Àyò Ọ̀pọ̀ — Yoruba Strategy Game
 
-A modern 2D digital version of the traditional Yoruba Ayo Ọ̀pọ̀ board game.
+A Godot 4 prototype of the traditional Yoruba Ayo Ọ̀pọ̀ board game, with a warm wood-and-seed visual style.
 
-## Current prototype
-- Godot 4 / GDScript
-- 12 pits, 48 seeds (4 per pit)
-- Local two-player hot-seat gameplay
-- Sowing, capture, turn switching, feeding rule, and basic game-end detection
+## Features in this prototype
+- **Play vs Computer:** Easy (random legal play), Medium, Hard, and Expert (search deeper with alpha-beta minimax).
+- **Local multiplayer:** two players share a device.
+- **Online multiplayer prototype:** ENet host/join over UDP port **8910**. The host is authoritative and synchronizes board state.
+- **Offline-first:** computer and same-device modes work without network.
+- **Board:** 12 pits, 4 seeds per pit at start.
+- **Rules:** forward sowing, 2/3 capture, backward chain capture, and feed-if-starved behavior.
 
-## Rules used for this prototype
-This build follows the rules previously agreed in the project conversation: choose a pit from your own row, sow one seed at a time forward around the 12-pit loop, capture when the final seed lands in an opponent pit containing 2 or 3 seeds, and continue backward capturing consecutive opponent pits that also contain 2 or 3. If the opponent has no seeds, a move must feed them whenever a legal feeding move exists. Rule variations can be revised as we validate the implementation.
+## Open in Godot
+1. Install Godot 4.x.
+2. Clone/download this repo.
+3. Open `project.godot` in Godot.
+4. Run the project.
 
+## Online notes / limitations
+The ENet mode is an early direct-connect prototype, not a matchmaking service. Host uses UDP 8910; players may need port forwarding or a network that permits direct inbound connections. For production online play, replace direct hosting with a relay/server, add lobby codes, disconnect handling, server-side rule validation, and anti-cheat.
 
-## Run
-Open the project folder in Godot 4 and run `Main.tscn`.
+## Rule note
+The game implements a commonly described Ayo Olopon rule set, but traditional house and regional variations exist. Validate capture/feed/end-game rules with experienced players before presenting a definitive rules guide.
+
+## Roadmap
+- [ ] Verify script and game behavior in Godot editor/runtime.
+- [ ] Add animated seed-by-seed sowing and sound assets.
+- [ ] Refine touch layout for small phones.
+- [ ] Add online relay/lobby infrastructure and reconnect flow.
+- [ ] Add Yoruba/English localization, tutorial, match history, and release packaging.

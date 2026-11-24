@@ -416,30 +416,20 @@ func _board_eval(board: Array) -> float:
 			value -= board[i] * 0.12
 	return value
 
-@rpc("authority", "call_remote", "reliable")
-func _sync_move_rpc_state(b: Array, s: Array, player: int, finished: bool, msg: String) -> void:
-	pits = b
-	scores = s
-	turn = player
-	ended = finished
-	message = msg
-	refresh_board()
-
 @rpc("any_peer", "call_remote", "reliable")
-func _sync_move(move: int, b: Array, s: Array, player: int, finished: bool, msg: String) -> void:
-	if mode != Mode.ONLINE:
+func _request_move(move: int) -> void:
+	if not online_host or mode != Mode.ONLINE:
+		return
+	if turn != 1 or move < 6 or move > 11 or pits[move] <= 0:
+		return
+	_apply_turn(move)
+
+@rpc("authority", "call_remote", "reliable")
+func _broadcast_state(b: Array, s: Array, player: int, finished: bool, msg: String) -> void:
+	if online_host:
 		return
 	pits = b
 	scores = s
-	turn = player
-	ended = finished
-	message = msg
-	refresh_board()
-
-@rpc("authority", "call_remote", "reliable")
-func _send_board_state(b: Array, s: Array, player: int, finished: bool, msg: String) -> void:
-	pits = b
- scores = s
 	turn = player
 	ended = finished
 	message = msg

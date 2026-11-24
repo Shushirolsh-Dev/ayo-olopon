@@ -107,6 +107,16 @@ func _setup_board(new_mode: Mode) -> void:
 	board_canvas.queue_redraw()
 
 func start_ai() -> void:
+	_clear_menu()
+	_add_menu_label("Choose computer difficulty", 24)
+	_add_menu_button("Easy", func(): _begin_ai(0))
+	_add_menu_button("Medium", func(): _begin_ai(1))
+	_add_menu_button("Hard", func(): _begin_ai(2))
+	_add_menu_button("Expert", func(): _begin_ai(3))
+	_add_menu_button("Back", show_menu)
+
+func _begin_ai(level: int) -> void:
+	difficulty = level
 	_setup_board(Mode.AI)
 	message = "Your turn. Choose a pit."
 	refresh_board()
@@ -168,7 +178,7 @@ func _start_join() -> void:
 func _on_peer_connected(id: int) -> void:
 	message = "Opponent connected! Your move."
 	refresh_board()
-	_send_board_state.rpc(id, pits, scores, turn, ended, message)
+	_broadcast_state.rpc(pits, scores, turn, ended, message)
 
 func _on_connected() -> void:
 	network_connected = true

@@ -44,6 +44,10 @@ func _build_shell() -> void:
 	brand.add_theme_font_size_override("font_size", 25)
 	brand.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(brand)
+	var restart := Button.new()
+	restart.text = "Restart"
+	restart.pressed.connect(_restart_current)
+	top.add_child(restart)
 	var back := Button.new()
 	back.text = "Home"
 	back.pressed.connect(show_menu)
@@ -187,6 +191,13 @@ func _on_connected() -> void:
 
 func _on_connection_failed() -> void:
 	message = "Connection failed. Check host IP and network."
+	refresh_board()
+
+func _restart_current() -> void:
+	if mode == Mode.MENU:
+		return
+	reset_board()
+	message = "Player 1 starts." if mode != Mode.ONLINE else ("Host starts." if online_host else "Host starts. Waiting for turn.")
 	refresh_board()
 
 func reset_board() -> void:

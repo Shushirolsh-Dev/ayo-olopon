@@ -290,9 +290,7 @@ func _feeds(board: Array, move: int, player: int) -> bool:
 	var cursor := move
 	while count > 0:
 		cursor = (cursor + 1) % N
-		if cursor == move:
-			continue
-		if _owns(cursor, 1 - player):
+		if cursor != move and _owns(cursor, 1 - player):
 			return true
 		count -= 1
 	return false
@@ -316,9 +314,8 @@ func _simulate(board: Array, capture_scores: Array, player: int, move: int) -> D
 	var cursor := move
 	while seeds > 0:
 		cursor = (cursor + 1) % N
-		if cursor == move:
-			continue
-		next[cursor] += 1
+		if cursor != move:
+			next[cursor] += 1
 		seeds -= 1
 	if _owns(cursor, 1 - player) and next[cursor] in [2, 3]:
 		while _owns(cursor, 1 - player) and next[cursor] in [2, 3]:

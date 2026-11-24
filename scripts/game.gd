@@ -196,8 +196,14 @@ func _on_connection_failed() -> void:
 func _restart_current() -> void:
 	if mode == Mode.MENU:
 		return
+	if mode == Mode.ONLINE and not online_host:
+		message = "Only the host can restart the online match."
+		refresh_board()
+		return
 	reset_board()
-	message = "Player 1 starts." if mode != Mode.ONLINE else ("Host starts." if online_host else "Host starts. Waiting for turn.")
+	message = "Player 1 starts." if mode != Mode.ONLINE else "Host starts. Waiting for opponent."
+	if mode == Mode.ONLINE and multiplayer.multiplayer_peer != null and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+		_broadcast_state.rpc(pits, scores, turn, ended, message)
 	refresh_board()
 
 func reset_board() -> void:

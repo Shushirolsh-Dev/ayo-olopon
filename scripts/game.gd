@@ -322,19 +322,24 @@ func _simulate(board: Array, capture_scores: Array, player: int, move: int) -> D
 				next_scores[0] += next[i]
 			else:
 				next_scores[1] += next[i]
-		\tnext[i] = 0
+			next[i] = 0
 		return {"board": next, "scores": next_scores, "next": next_player, "terminal": true}
 	return {"board": next, "scores": next_scores, "next": next_player, "terminal": false}
 
 func _apply_turn(move: int) -> void:
+	if mode == Mode.ONLINE and not online_host:
+		_request_move.rpc_id(1, move)
+		message = "Move sent to host..."
+		refresh_board()
+		return
 	var state := _simulate(pits, scores, turn, move)
 	pits = state.board
 	scores = state.scores
 	turn = state.next
 	ended = state.terminal
 	message = _winner_text() if ended else ("Player %d moved." % (turn + 1))
-	if mode == Mode.ONLINE and multiplayer.multiplayer_peer != null and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
-		_sync_move.rpc(move, pits, scores, turn, ended, message)
+	if mode == Mode.ONLINE and online_host and multiplayer.multiplayer_peer != null and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+		_broadcast_state.rpc(pits, scores, turn, ended, message)
 	refresh_board()
 	if mode == Mode.AI and turn == 1 and not ended:
 		ai_busy = true
@@ -407,7 +412,7 @@ func _board_eval(board: Array) -> float:
 @rpc("authority", "call_remote", "reliable")
 func _sync_move_rpc_state(b: Array, s: Array, player: int, finished: bool, msg: String) -> void:
 	pits = b
- scores = s
+	scores = s
 	turn = player
 	ended = finished
 	message = msg
